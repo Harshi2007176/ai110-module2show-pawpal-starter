@@ -4,12 +4,11 @@
 
 **a. Initial design**
 
-My initial design had three classes: Owner (stores the owner's name and their list of pets), Pet (stores the pet's name, species, and list of tasks), and Task (stores a task's name, duration, priority, and whether it's done). The Owner is responsible for managing pets, Pet is responsible for managing its own tasks, and Task just holds data about one care activity.
+My initial UML design consists of five classes: Owner, Pet, Task, Scheduler, and DailyPlan. The Owner class stores the owner's name, their list of pets, and their preferences, and is responsible for adding pets and collecting tasks across all of them. The Pet class stores each pet's name, species, age, and list of tasks, and is responsible for adding, removing, and retrieving its own tasks. The Task class holds the details of a single care activity — its name, category, duration, priority, whether it recurs, a preferred time, and completion status — and is responsible for marking itself done. The Scheduler class acts as the core logic of the system, taking in all tasks and available time to sort by priority, detect conflicts, generate a daily plan, and explain its scheduling decisions. Finally, the DailyPlan class stores the finished schedule, including the date, ordered tasks, and total time used, and is responsible for displaying the plan. Together, these classes form a clear structure where an Owner has many Pets, each Pet has many Tasks, and the Scheduler organizes those Tasks into a DailyPlan.
 
 **b. Design changes**
 
-Yes. Originally I had Task handle its own sorting logic, but I realized that made the class too complicated. So I moved the sorting/prioritizing logic into a separate Scheduler class instead. This kept Task simple (just storing data) while Scheduler handled the "smart" decision-making — which made the code easier to test and understand.
-
+Yes, my design changed after reviewing the skeleton with AI feedback. The AI pointed out that DailyPlan.scheduled_tasks only stored Task objects with no way to record when each task was actually scheduled, which would make real conflict detection impossible. To fix this, I [changed scheduled_tasks to store each task alongside a start time / added a ScheduledTask class pairing a task with a start time]. I also renamed duration to duration_minutes for clarity, since the original name didn't specify units.
 ---
 
 ## 2. Scheduling Logic and Tradeoffs
@@ -21,8 +20,9 @@ Yes. Originally I had Task handle its own sorting logic, but I realized that mad
 
 **b. Tradeoffs**
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+One tradeoff my scheduler makes is that conflict detection only checks for exact matching task times, such as two tasks both scheduled at 18:00. It does not yet check for overlapping durations, like a 30-minute walk at 18:00 conflicting with a feeding at 18:15. I asked AI how the algorithm could be simplified, and it suggested breaking the conflict logic into smaller helper methods. I decided to keep the current version because it is still readable for this project and avoids making the code feel more complicated than the assignment needs.
+
+This tradeoff is reasonable because PawPal+ is a beginner-friendly scheduling app, and exact-time warnings already help the pet owner notice obvious conflicts. A more advanced version could compare start and end times, but the current approach keeps the logic easier to explain, test, and maintain.
 
 ---
 

@@ -46,12 +46,21 @@ pip install -r requirements.txt
 
 Paste a sample of your app's CLI or Streamlit output here so a reader can see what a generated plan looks like:
 
-```
-# e.g.:
-# Daily plan for Biscuit (Golden Retriever):
-#   08:00 — Morning walk (30 min) [priority: high]
-#   09:00 — Feeding (10 min) [priority: high]
-#   ...
+Running `python3 main.py`:
+
+```text
+Today's Schedule
+================
+Owner: Jordan
+
+Daily plan for 2026-07-07:
+- Morning Walk (30 min, priority 5)
+- Breakfast (10 min, priority 4)
+- Puzzle Toy (20 min, priority 3)
+Total time used: 60 minutes
+
+Reasoning:
+Tasks were sorted by priority from highest to lowest, then added until the 60 minutes of available time were used. Scheduled tasks: Morning Walk, Breakfast, Puzzle Toy. Total time used: 60 minutes.
 ```
 
 ## 🧪 Testing PawPal+
@@ -72,14 +81,17 @@ Sample test output:
 
 ## 📐 Smarter Scheduling
 
-> Fill in once you've implemented scheduling logic.
+PawPal+ includes a few lightweight scheduling algorithms in `pawpal_system.py`.
 
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+| Priority sorting | `Scheduler.sort_by_priority()` | Orders tasks from highest to lowest priority so important care tasks are considered first. |
+| Time sorting | `Scheduler.sort_by_time()` | Orders tasks by their `HH:MM` time string, with untimed tasks placed last. |
+| Time-limited planning | `Scheduler.generate_daily_plan()` | Builds a daily plan by adding incomplete tasks until the owner's available time is used. |
+| Completion filtering | `Scheduler.filter_by_status()` | Returns either completed or incomplete tasks. |
+| Pet filtering | `Scheduler.filter_by_pet()` | Returns only the tasks that belong to a named pet. |
+| Conflict detection | `Scheduler.detect_conflicts()` | Returns warning messages when multiple tasks share the same exact time or preferred time. |
+| Recurring tasks | `Scheduler.mark_task_complete()` | Marks a task complete and creates the next daily or weekly occurrence using `timedelta`. |
 
 ## 📸 Demo Walkthrough
 
