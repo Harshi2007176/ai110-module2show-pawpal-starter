@@ -4,13 +4,11 @@
 
 **a. Initial design**
 
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
+My initial design had three classes: Owner (stores the owner's name and their list of pets), Pet (stores the pet's name, species, and list of tasks), and Task (stores a task's name, duration, priority, and whether it's done). The Owner is responsible for managing pets, Pet is responsible for managing its own tasks, and Task just holds data about one care activity.
 
 **b. Design changes**
 
-- Did your design change during implementation?
-- If yes, describe at least one change and why you made it.
+Yes. Originally I had Task handle its own sorting logic, but I realized that made the class too complicated. So I moved the sorting/prioritizing logic into a separate Scheduler class instead. This kept Task simple (just storing data) while Scheduler handled the "smart" decision-making — which made the code easier to test and understand.
 
 ---
 
