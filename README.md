@@ -65,19 +65,48 @@ Tasks were sorted by priority from highest to lowest, then added until the 60 mi
 
 ## 🧪 Testing PawPal+
 
+Run the full automated test suite from the project root:
+
 ```bash
-# Run the full test suite:
-pytest
-
-# Run with coverage:
-pytest --cov
+python -m pytest
 ```
 
-Sample test output:
+The suite lives in `tests/` and covers the core scheduling behaviors,
+including both happy paths and edge cases:
+
+- **Sorting correctness** — tasks return in chronological (`HH:MM`) order,
+  and untimed tasks (`time=None`) sort to the end without crashing.
+- **Recurrence logic** — completing a daily task creates a new task for the
+  next day; non-recurring tasks create no copy.
+- **Conflict detection** — the `Scheduler` flags two tasks scheduled at the
+  same exact time, and returns no warnings when times differ.
+- **Core model behavior** — task completion status, pet task management,
+  owner task aggregation, priority sorting, time-limited daily planning,
+  and completion/pet filtering.
+
+Successful run:
 
 ```
-# Paste your pytest output here
+============================= test session starts ==============================
+platform darwin -- Python 3.13.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /Users/harshinibondila/ai110-module2show-pawpal-starter
+plugins: anyio-4.14.0
+collected 20 items
+
+tests/test_pawpal.py ........                                            [ 40%]
+tests/test_pawpal_system.py ............                                 [100%]
+
+============================== 20 passed in 0.02s ==============================
 ```
+
+**Confidence Level: ★★★★☆ (4/5)**
+
+All 20 tests pass, covering every core scheduling algorithm plus key edge
+cases (empty times, non-recurring tasks, non-conflicting schedules). Held
+back from 5 stars because a few paths remain untested — case-insensitive
+pet filtering, unknown recurrence frequencies (e.g. `monthly`), and
+three-way time conflicts — so reliability is high but not yet exhaustively
+proven.
 
 ## 📐 Smarter Scheduling
 
