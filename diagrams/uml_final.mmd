@@ -1,0 +1,65 @@
+classDiagram
+    class Task {
+        +str name
+        +str category
+        +int duration
+        +int priority
+        +str description
+        +str frequency
+        +str time
+        +date due_date
+        +bool is_recurring
+        +str preferred_time
+        +bool is_done
+        +mark_done() None
+        +mark_complete() None
+    }
+
+    class Pet {
+        +str name
+        +str species
+        +int age
+        +list~Task~ tasks
+        +add_task(task) None
+        +remove_task(task) None
+        +get_tasks() list~Task~
+    }
+
+    class Owner {
+        +str name
+        +list~Pet~ pets
+        +dict preferences
+        +add_pet(pet) None
+        +get_all_tasks() list~Task~
+    }
+
+    class DailyPlan {
+        +date date
+        +list~Task~ scheduled_tasks
+        +int total_time_used
+        +display() str
+        +add_task_to_plan(task) None
+    }
+
+    class Scheduler {
+        +tasks tasks_or_owner
+        +int available_time
+        +DailyPlan last_plan
+        +get_tasks() list~Task~
+        +sort_by_priority() list~Task~
+        +sort_by_time() list~Task~
+        +filter_by_status(is_done) list~Task~
+        +filter_by_pet(pet_name) list~Task~
+        +mark_task_complete(task) Task
+        +detect_conflicts() list~str~
+        +generate_daily_plan(plan_date) DailyPlan
+        +explain_plan() str
+    }
+
+    Owner "1" --> "*" Pet : owns
+    Pet "1" --> "*" Task : has
+    Owner --> "*" Task : aggregates
+    Scheduler --> Owner : reads (or task list)
+    Scheduler ..> Task : sorts / filters / completes
+    Scheduler --> DailyPlan : creates
+    DailyPlan --> "*" Task : includes

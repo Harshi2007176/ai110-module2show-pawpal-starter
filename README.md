@@ -22,6 +22,30 @@ Your final app should:
 - Display the plan clearly (and ideally explain the reasoning)
 - Include tests for the most important scheduling behaviors
 
+## ✨ Features
+
+PawPal+ implements several lightweight scheduling algorithms in `pawpal_system.py`,
+all exposed through both the Streamlit UI (`app.py`) and the CLI demo (`main.py`):
+
+- **Priority scheduling** — builds a daily plan by adding incomplete tasks from
+  highest to lowest priority until the owner's available time is used up
+  (`generate_daily_plan`).
+- **Sorting by priority** — orders every task from most to least important
+  (`sort_by_priority`).
+- **Sorting by time** — orders tasks chronologically by their `HH:MM` time,
+  placing untimed tasks last (`sort_by_time`).
+- **Filtering by status** — separates completed from outstanding tasks
+  (`filter_by_status`).
+- **Filtering by pet** — returns only the tasks belonging to a named pet,
+  case-insensitively (`filter_by_pet`).
+- **Conflict warnings** — flags when two tasks share the same exact time, or the
+  same preferred time slot, so the owner can reschedule (`detect_conflicts`).
+- **Daily & weekly recurrence** — completing a recurring task automatically
+  generates its next occurrence one day or one week later; non-recurring tasks
+  are left alone (`mark_task_complete`).
+- **Plan explanation** — produces a plain-language summary of why tasks were
+  chosen and ordered (`explain_plan`).
+
 ## Getting started
 
 ### Setup
@@ -54,13 +78,13 @@ Today's Schedule
 Owner: Jordan
 
 Daily plan for 2026-07-07:
-- Morning Walk (30 min, priority 5)
-- Breakfast (10 min, priority 4)
+- Evening Walk (30 min, priority 5)
+- Cat Breakfast (10 min, priority 4)
 - Puzzle Toy (20 min, priority 3)
 Total time used: 60 minutes
 
 Reasoning:
-Tasks were sorted by priority from highest to lowest, then added until the 60 minutes of available time were used. Scheduled tasks: Morning Walk, Breakfast, Puzzle Toy. Total time used: 60 minutes.
+Tasks were sorted by priority from highest to lowest, then added until the 60 minutes of available time were used. Scheduled tasks: Evening Walk, Cat Breakfast, Puzzle Toy. Total time used: 60 minutes.
 ```
 
 ## 🧪 Testing PawPal+
@@ -122,14 +146,86 @@ PawPal+ includes a few lightweight scheduling algorithms in `pawpal_system.py`.
 | Conflict detection | `Scheduler.detect_conflicts()` | Returns warning messages when multiple tasks share the same exact time or preferred time. |
 | Recurring tasks | `Scheduler.mark_task_complete()` | Marks a task complete and creates the next daily or weekly occurrence using `timedelta`. |
 
-## 📸 Demo Walkthrough
+## 🎬 Demo Walkthrough
 
-Describe your app in numbered steps so a reader can follow along without watching a video:
+### Main UI features
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+The Streamlit app (`streamlit run app.py`) lets a pet owner:
+
+- **Set the owner** — enter the owner's name.
+- **Add pets** — name, species, and age; added pets appear in a table.
+- **Add tasks per pet** — title, category, duration, priority (1–5), a preferred
+  time slot, and an optional exact `HH:MM` scheduled time.
+- **Review all tasks** — a table shows every task with its pet, duration,
+  priority, time, and done status.
+- **Build a schedule** — set the available minutes for the day and generate a
+  plan. The app then displays conflict checks, the day's plan, sortable task
+  views, outstanding tasks, and the plan's reasoning.
+
+### Example workflow
+
+1. Enter the owner name (e.g. *Jordan*).
+2. Add a pet — *Bella*, a 4-year-old dog.
+3. Add a task for Bella — *Evening Walk*, 30 min, priority 5, scheduled `18:00`.
+4. Add another task — *Puzzle Toy*, 20 min, priority 3, also scheduled `18:00`.
+5. Set available time to 60 minutes and click **Generate schedule**.
+6. PawPal+ warns that *Evening Walk* and *Puzzle Toy* clash at `18:00`, shows the
+   priority-ordered daily plan, and explains its reasoning.
+
+### Key Scheduler behaviors shown
+
+- **Priority ordering** — the daily plan lists the highest-priority tasks first.
+- **Sorting** — tasks can be re-sorted by priority or by time on demand.
+- **Conflict warnings** — same-time tasks are flagged with an amber warning that
+  names both tasks and suggests moving one.
+- **Filtering** — outstanding (not-done) tasks are listed separately.
+- **Recurrence** — completing a daily task rolls it forward to the next day.
+
+### Sample CLI output
+
+Running `python3 main.py`:
+
+```text
+Today's Schedule
+================
+Owner: Jordan
+
+Daily plan for 2026-07-07:
+- Evening Walk (30 min, priority 5)
+- Cat Breakfast (10 min, priority 4)
+- Puzzle Toy (20 min, priority 3)
+Total time used: 60 minutes
+
+Reasoning:
+Tasks were sorted by priority from highest to lowest, then added until the 60 minutes of available time were used. Scheduled tasks: Evening Walk, Cat Breakfast, Puzzle Toy. Total time used: 60 minutes.
+
+Sorted by Time
+==============
+07:30 - Cat Breakfast (feeding)
+08:30 - Morning Brush (grooming)
+18:00 - Evening Walk (walk)
+18:00 - Puzzle Toy (enrichment)
+
+Incomplete Tasks
+================
+- Evening Walk
+- Cat Breakfast
+- Puzzle Toy
+
+Conflict Warnings
+=================
+- 18:00 conflict: Bella - Evening Walk, Mochi - Puzzle Toy are scheduled at the same time.
+- morning has multiple preferred tasks: Morning Brush, Cat Breakfast
+
+Bella's Tasks
+=============
+- Evening Walk at 18:00 (not done)
+- Morning Brush at 08:30 (done)
+
+Recurring Completion
+====================
+Completed: Cat Breakfast for 2026-07-07
+Next occurrence: Cat Breakfast for 2026-07-08
+```
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->

@@ -98,6 +98,7 @@ if owner.pets:
             "Preferred time",
             ["morning", "afternoon", "evening", "anytime"],
         )
+        scheduled_time = st.time_input("Scheduled time (HH:MM)", value=None)
         submitted_task = st.form_submit_button("Add task")
 
     if submitted_task:
@@ -108,6 +109,7 @@ if owner.pets:
                 duration=int(duration),
                 priority=int(priority),
                 preferred_time=preferred_time,
+                time=scheduled_time.strftime("%H:%M") if scheduled_time else None,
             )
         )
         st.success(f"Added {task_title} for {selected_pet.name}.")
@@ -124,8 +126,9 @@ if owner.pets:
                         "Category": task.category,
                         "Duration": task.duration,
                         "Priority": task.priority,
+                        "Time": task.time or "—",
                         "Preferred time": task.preferred_time,
-                        "Done": task.is_done,
+                        "Done": "✅" if task.is_done else "⬜",
                     }
                 )
         st.write("Current tasks:")
@@ -150,13 +153,75 @@ if st.button("Generate schedule"):
     plan = scheduler.generate_daily_plan()
     conflicts = scheduler.detect_conflicts()
 
-    st.markdown("### Today's Schedule")
-    st.text(plan.display())
-
+    # --- Conflict warnings: surface first, one actionable warning per conflict ---
+    st.markdown("### ⚠️ Conflict Check")
     if conflicts:
-        st.warning("Conflicts found:")
+        st.warning(
+            f"Found {len(conflicts)} scheduling conflict(s). "
+            "Consider moving one of the overlapping tasks to a different time."
+        )
         for conflict in conflicts:
-            st.write(f"- {conflict}")
+            st.warning(f"🔁 {conflict}")
+    else:
+        st.success("No scheduling conflicts found. You're all set! 🎉")
 
-    st.markdown("### Reasoning")
-    st.write(scheduler.explain_plan())
+    # --- Today's plan as a professional table + summary metrics ---
+    st.markdown("### 🗓️ Today's Schedule")
+    if plan.scheduled_tasks:
+        plan_rows = [
+            {
+                "Task": task.name,
+                "Category": task.category,
+                "Time": task.time or "—",
+                "Duration (min)": task.duration,
+                "Priority": task.priority,
+            }
+            for task in plan.scheduled_tasks
+        ]
+        st.table(plan_rows)
+
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Tasks scheduled", len(plan.scheduled_tasks))
+        col2.metric("Time used", f"{plan.total_time_used} min")
+        col3.metric("Time free", f"{int(available_time) - plan.total_time_used} min")
+    else:
+        st.info("No tasks fit in the available time. Add tasks or increase available time.")
+
+    # --- Sorted views using Scheduler sorting methods ---
+    st.markdown("### 🔀 All Tasks, Sorted")
+    sort_choice = st.radio(
+        "Sort by",
+        ["Priority (high → low)", "Time (early → late)"],
+        horizontal=True,
+    )
+    if sort_choice.startswith("Priority"):
+        sorted_tasks = scheduler.sort_by_priority()
+    else:
+        sorted_tasks = scheduler.sort_by_time()
+
+    if sorted_tasks:
+        st.table(
+            [
+                {
+                    "Task": task.name,
+                    "Time": task.time or "—",
+                    "Priority": task.priority,
+                    "Duration (min)": task.duration,
+                    "Status": "✅ Done" if task.is_done else "⬜ Open",
+                }
+                for task in sorted_tasks
+            ]
+        )
+
+    # --- Filter: what's still outstanding ---
+    incomplete = scheduler.filter_by_status(is_done=False)
+    st.markdown(f"### 📋 Outstanding Tasks ({len(incomplete)})")
+    if incomplete:
+        for task in incomplete:
+            st.write(f"- {task.name} ({task.duration} min, priority {task.priority})")
+    else:
+        st.success("Everything is done. Nice work! 🐾")
+
+    # --- Plan reasoning ---
+    st.markdown("### 💡 Reasoning")
+    st.info(scheduler.explain_plan())
